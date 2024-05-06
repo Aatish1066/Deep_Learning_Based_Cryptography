@@ -1,5 +1,3 @@
-Sure, here's a README.md file based on the conversation about the project:
-
 ---
 
 # Secure Chat Application
