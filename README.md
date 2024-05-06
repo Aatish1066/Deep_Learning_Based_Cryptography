@@ -17,7 +17,7 @@ The Secure Chat Application is a simple client-server chat system that provides 
 1. Clone the repository to your local machine:
 
    ```bash
-   git clone https://github.com/your-username/secure-chat-application.git
+   git clone https://github.com/your-username/Deep_Learning_Based_Cryptography.git
    ```
 
 2. Install the required dependencies:
