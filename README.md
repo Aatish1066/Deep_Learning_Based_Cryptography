@@ -67,5 +67,3 @@ The Secure Chat Application is a simple client-server chat system that provides 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-
-Feel free to customize the README.md file further based on your project's specific details and requirements!
