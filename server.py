@@ -1,61 +1,58 @@
-import socket
-import threading
+import sys
+import os
+from flask import Flask, request, jsonify
+import encryption_decryption_functions
+import numpy as np
+
+app = Flask(__name__)
 
 class Server:
-    def __init__(self, host, port):
-        self.host = host
-        self.port = port
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_sockets = []
-        self.running = True
 
-        self.start_server()
 
-    def start_server(self):
-        self.server_socket.bind((self.host, self.port))
-        self.server_socket.listen(5)
-        print(f"Server is listening on {self.host}:{self.port}")
-        self.accept_clients()
+    def process_message(self, message, choice):
+        if choice.lower() == 'encrypt':
+            processed_message = self.send_message(message)
+        elif choice.lower() == 'decrypt':
+            processed_message = self.receive_message(message)
+        else:
+            return "Invalid choice. Please enter 'encrypt' or 'decrypt'."
 
-    def accept_clients(self):
-        while self.running:
-            client_socket, client_address = self.server_socket.accept()
-            print(f"Connection from {client_address}")
-            self.client_sockets.append(client_socket)
-            client_thread = threading.Thread(target=self.handle_client, args=(client_socket,))
-            client_thread.start()
+        return processed_message
 
-    def handle_client(self, client_socket):
-        while self.running:
-            try:
-                message = client_socket.recv(1024).decode()
-                if not message:
-                    break
-                # print(f"Received message: {message}")
-                self.broadcast(message, client_socket)
-            except Exception as e:
-                print(f"Error: {e}")
-                break
+    def send_message(self, message):
+        try:
+            encrypted_message = encryption_decryption_functions.encrypt_message(message, np.array([[0, 0, 0, 0, 0, 0, 0, 0]]))
+            return encrypted_message
+        except Exception as e:
+            return f"Error sending message: {e}"
 
-    def broadcast(self, message, sender_socket):
-        for client_socket in self.client_sockets:
-            if client_socket != sender_socket:
-                try:
-                    client_socket.send(message.encode())
-                except Exception as e:
-                    print(f"Error broadcasting message: {e}")
-                    self.client_sockets.remove(client_socket)
+    def receive_message(self, message):
+        try:
+            if message and not message.startswith("1/1 ["):
+                # Suppress progress messages during prediction
+                with open(os.devnull, 'w') as fnull:
+                    sys.stdout = fnull
+                    decrypted_message = encryption_decryption_functions.decrypt_message(message, np.array(
+                        [[0, 0, 0, 0, 0, 0, 0, 0]]))
+                    sys.stdout = sys.__stdout__  # Restore standard output
+                    print(decrypted_message)
+                    return decrypted_message
 
-    def close(self):
-        for client_socket in self.client_sockets:
-            client_socket.close()
-        self.server_socket.close()
-        self.running = False
+        except Exception as e:
+            return f"Error receiving message: {e}"
 
-def main():
-    host = '127.0.0.1'  # Localhost
-    port = 5555
-    server = Server(host, port)
+@app.route('/process_message', methods=['POST'])
+def process_message():
+    data = request.get_json()
+    message = data['message']
+    choice = data['choice']
 
-if __name__ == "__main__":
-    main()
+    server = Server()  # Create an instance of the server
+    processed_message = server.process_message(message, choice)
+
+    return jsonify({"processed_message": processed_message})
+
+
+if __name__ == '__main__':
+    app.run(debug=True,port=8888)
+
