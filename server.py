@@ -1,0 +1,58 @@
+import sys
+import os
+from flask import Flask, request, jsonify
+import encryption_decryption_functions
+import numpy as np
+
+app = Flask(__name__)
+
+class Server:
+
+
+    def process_message(self, message, choice):
+        if choice.lower() == 'encrypt':
+            processed_message = self.send_message(message)
+        elif choice.lower() == 'decrypt':
+            processed_message = self.receive_message(message)
+        else:
+            return "Invalid choice. Please enter 'encrypt' or 'decrypt'."
+
+        return processed_message
+
+    def send_message(self, message):
+        try:
+            encrypted_message = encryption_decryption_functions.encrypt_message(message, np.array([[0, 0, 0, 0, 0, 0, 0, 0]]))
+            return encrypted_message
+        except Exception as e:
+            return f"Error sending message: {e}"
+
+    def receive_message(self, message):
+        try:
+            if message and not message.startswith("1/1 ["):
+                # Suppress progress messages during prediction
+                with open(os.devnull, 'w') as fnull:
+                    sys.stdout = fnull
+                    decrypted_message = encryption_decryption_functions.decrypt_message(message, np.array(
+                        [[0, 0, 0, 0, 0, 0, 0, 0]]))
+                    sys.stdout = sys.__stdout__  # Restore standard output
+                    print(decrypted_message)
+                    return decrypted_message
+
+        except Exception as e:
+            return f"Error receiving message: {e}"
+
+@app.route('/process_message', methods=['POST'])
+def process_message():
+    data = request.get_json()
+    message = data['message']
+    choice = data['choice']
+
+    server = Server()  # Create an instance of the server
+    processed_message = server.process_message(message, choice)
+
+    return jsonify({"processed_message": processed_message})
+
+
+if __name__ == '__main__':
+    app.run(debug=True,port=8888)
+

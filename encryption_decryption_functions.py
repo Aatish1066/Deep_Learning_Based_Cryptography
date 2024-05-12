@@ -13,12 +13,12 @@ pad = 'same'
 # Compute the size of the message space
 m_train = 2 ** (m_bits + k_bits)
 
-alice_file = 'models/crypto/' + model_name + '-alice'
-bob_file = 'models/crypto/' + model_name + '-bob'
-eve_file = 'models/crypto/' + model_name + '-eve'
-alice = load_model(alice_file + '.h5')
-bob = load_model(bob_file + '.h5')
-eve = load_model(eve_file + '.h5')
+alice_file = "models/crypto/ANC-alice"
+bob_file = "models/crypto/ANC-bob"
+eve_file = "models/crypto/ANC-eve"
+alice = load_model("models/crypto/ANC-alice.h5")
+bob = load_model("models/crypto/ANC-bob.h5")
+eve = load_model("models/crypto/ANC-eve.h5")
 block_size_unpadded = 5
 block_padding = 3
 block_size = block_size_unpadded + block_padding
@@ -141,20 +141,20 @@ def decrypt_message(ciphertext, key):
     return m_dec
 
 
-
-# Define a function to handle encryption and decryption
-def handle_message(message, key):
-
-    # Convert key to numpy array
-    key = np.array(eval(key))  # Assuming the key input is in the format [0, 1, 0, 1, ...]
-    key = key.reshape(1, -1)  # Reshape key to (1, 8)
-
-    # Encryption
-    ciphertext = encrypt_message(message, key)
-
-    # Decryption
-    decrypted_message = decrypt_message(ciphertext, key)
-
+#
+# # Define a function to handle encryption and decryption
+# def handle_message(message, key):
+#
+#     # Convert key to numpy array
+#     key = np.array(eval(key))  # Assuming the key input is in the format [0, 1, 0, 1, ...]
+#     key = key.reshape(1, -1)  # Reshape key to (1, 8)
+#
+#     # Encryption
+#     ciphertext = encrypt_message(message, key)
+#
+#     # Decryption
+#     decrypted_message = decrypt_message(ciphertext, key)
+#
 #     # Update the UI with the results
 #     encrypted_text_var.set(ciphertext)
 #     decrypted_text_var.set(decrypted_message)
